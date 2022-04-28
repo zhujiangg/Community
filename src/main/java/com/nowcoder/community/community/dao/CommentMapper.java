@@ -12,11 +12,14 @@ import java.util.List;
  * @Description: 评论操作：
  *                  1、查询每页的评论
  *                  2、查询回复的数量（评论的数量在 DiscussPost 中能取到）
+ *                  3、添加评论
  */
 @Mapper
 public interface CommentMapper {
 
     List<Comment> selectCommentsByEntity(int entityType, int entityId, int offset, int limit);
 
-    int  selectCountByEntity(int entityType, int entityId);
+    int selectCountByEntity(int entityType, int entityId);
+
+    int insertComment(Comment comment);
 }

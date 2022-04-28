@@ -18,6 +18,7 @@ import java.util.List;
  *                  2、查询帖子数量
  *                  3、增加帖子
  *                  4、根据 id查询帖子
+ *                  5、修改帖子评论数量
  */
 
 @Service
@@ -54,5 +55,9 @@ public class DiscussPostService {
 
     public DiscussPost findDiscussPostById(int id){
         return discussPostMapper.selectDiscussPostById(id);
+    }
+
+    public int updateCommentCount(int id, int commentCount){
+        return discussPostMapper.updateCommentCount(id, commentCount);
     }
 }

@@ -15,6 +15,7 @@ import java.util.List;
  *                  2、查询帖子数量
  *                  3、增加帖子
  *                  4、根据 id查询帖子
+ *                  5、修改帖子评论数量
  */
 @Mapper
 public interface DiscussPostMapper {
@@ -31,4 +32,6 @@ public interface DiscussPostMapper {
 
     // 查询帖子
     DiscussPost selectDiscussPostById(int id);
+
+    int updateCommentCount(int id, int commentCount);
 }

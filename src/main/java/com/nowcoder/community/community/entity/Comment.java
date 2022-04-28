@@ -16,7 +16,7 @@ import java.util.Date;
  * | entity_id   | int(11)   | YES  | MUL | NULL    |                | 评论目标的 id（评论的帖子 id、回复的评论id）
  * | target_id   | int(11)   | YES  |     | NULL    |                | 指向性评论（回复 回复的id）
  * | content     | text      | YES  |     | NULL    |                |
- * | status      | int(11)   | YES  |     | NULL    |                |
+ * | status      | int(11)   | YES  |     | NULL    |                | 默认设置为 0
  * | create_time | timestamp | YES  |     | NULL    |                |
  * +-------------+-----------+------+-----+---------+----------------+
  */
