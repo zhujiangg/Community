@@ -3,6 +3,7 @@ $(function(){
 });
 
 function publish() {
+	// 隐藏发布框
 	$("#publishModal").modal("hide");
 
 	// 获取标题和内容

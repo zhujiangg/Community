@@ -22,7 +22,7 @@ import java.util.*;
  * @Date: 2022/4/18 10:18
  * @Version: 1.0
  * @Description: 用户相关服务
- *  1、通过 id查找用户
+ *  1、通过 id查找用户、通过 name查找用户
  *  2、用户注册（提交账号、密码、邮箱），返回一个 Map<String, Object>集合（放入提示信息，若为 null说明成功注册）
  *      2.1、判断为空（user, username, password, email）
  *      2.2、验证账号、邮箱
@@ -46,8 +46,13 @@ public class UserService implements CommunityConstant {
         return userMapper.selectById(id);
     }
 
+    public User findUserByName(String username) {
+        return userMapper.selectByName(username);
+    }
+
     @Autowired
     private MailClient mailClient;
+
     @Autowired
     private TemplateEngine templateEngine;
 

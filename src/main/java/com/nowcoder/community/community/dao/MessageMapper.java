@@ -15,6 +15,8 @@ import java.util.List;
  *          3、查询会话所包含的私信列表
  *          4、查询会话所包含的私信数量
  *          5、查询未读私信数量（总的、以及各会话下的）
+ *          6、增加私信
+ *          7、修改会话下所有私信状态
  */
 @Mapper
 public interface MessageMapper {
@@ -30,4 +32,8 @@ public interface MessageMapper {
     int selectLetterCount(String conversationId);
 
     int selectLetterUnreadCount(int userId, String conversationId);
+
+    int insertMessage(Message message);
+
+    int  updateStatus(List<Integer> ids, int status);
 }

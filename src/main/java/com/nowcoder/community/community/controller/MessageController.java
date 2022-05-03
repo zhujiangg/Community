@@ -5,6 +5,7 @@ import com.nowcoder.community.community.entity.Page;
 import com.nowcoder.community.community.entity.User;
 import com.nowcoder.community.community.service.MessageService;
 import com.nowcoder.community.community.service.UserService;
+import com.nowcoder.community.community.util.CommunityUtil;
 import com.nowcoder.community.community.util.HostHolder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -12,11 +13,9 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @Author: ZhuJiang
@@ -36,6 +35,7 @@ public class MessageController {
     @Autowired
     private UserService userService;
 
+    // 私信列表
     @RequestMapping(path = "/letter/list", method = RequestMethod.GET)
     public String getLetterList(Model model, Page page){
         User user = hostHolder.getUser();
@@ -65,6 +65,7 @@ public class MessageController {
         return "/site/letter";
     }
 
+    // 私信详情
     @RequestMapping(path = "/letter/detail/{conversationId}")
     public String getLetterDetail(@PathVariable("conversationId") String conversationId, Model model, Page page){
         User user = hostHolder.getUser();
@@ -93,6 +94,23 @@ public class MessageController {
          */
         model.addAttribute("target", getLetterTarget(conversationId));
 
+        /**
+         * 设置已读
+         *  当登录用户是接收用户时，即我收到了消息后已读
+         * */
+        List<Integer> ids = new ArrayList<>();
+
+        if (letterList != null) {
+            for (Message letter : letterList) {
+                if (hostHolder.getUser().getId() == letter.getToId() && letter.getStatus() == 0) {
+                    ids.add(letter.getId());
+                }
+            }
+        }
+        if (!ids.isEmpty()) {
+            messageService.readMessage(ids);
+        }
+
         return "/site/letter-detail";
     }
 
@@ -102,5 +120,28 @@ public class MessageController {
         int s2 = Integer.parseInt(s[1]);
         int targetUserId = hostHolder.getUser().getId() == s1 ? s2 : s1;
         return userService.findUserById(targetUserId);
+    }
+
+    @RequestMapping(path = "/letter/send", method = RequestMethod.POST)
+    @ResponseBody
+    public String sendLetter(String toName, String content){
+        Integer.valueOf("abc");
+        User target = userService.findUserByName(toName);
+        if(target == null){
+            return CommunityUtil.getJsonString(1, "目标用户不存在!");
+        }
+
+        Message message = new Message();
+        message.setContent(content);
+        message.setCreateTime(new Date());
+        message.setFromId(hostHolder.getUser().getId());
+        message.setToId(target.getId());
+        if(message.getFromId() < message.getToId()){
+            message.setConversationId(message.getFromId() + "_" + message.getToId());
+        }else {
+            message.setConversationId(message.getToId() + "_" + message.getFromId());
+        }
+        messageService.addMessage(message);
+        return CommunityUtil.getJsonString(0, "发送成功！");
     }
 }
