@@ -58,6 +58,7 @@ public class UserService implements CommunityConstant {
 
     @Autowired
     private LoginTicketMapper loginTicketMapper;
+
     // 拼接 url: http://localhost:8080/inis
     @Value("${community.path.domain}")
     private String domain;

@@ -6,7 +6,9 @@ import com.nowcoder.community.community.entity.DiscussPost;
 import com.nowcoder.community.community.entity.Page;
 import com.nowcoder.community.community.entity.User;
 import com.nowcoder.community.community.service.DiscussPostService;
+import com.nowcoder.community.community.service.LikeService;
 import com.nowcoder.community.community.service.UserService;
+import com.nowcoder.community.community.util.CommunityConstant;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -28,12 +30,16 @@ import java.util.Map;
  */
 
 @Controller
-public class HomeController {
+public class HomeController implements CommunityConstant {
 
     @Autowired
     private UserService userService;
+
     @Autowired
     private DiscussPostService discussPostService;
+
+    @Autowired
+    private LikeService likeService;
 
     @ResponseBody
     @RequestMapping("/hello")
@@ -56,6 +62,7 @@ public class HomeController {
                 Map<String, Object> map = new HashMap<>();
                 map.put("post", post);
                 map.put("user", user);
+                map.put("likeCount", likeService.findEntityLikeCount(ENTITY_TYPE_POST, post.getId()));
                 discussPosts.add(map);
             }
         }

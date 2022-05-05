@@ -6,7 +6,7 @@ package com.nowcoder.community.community.util;
  * @Version: 1.0
  * @Description: 激活状态：成功、重复激活、失败
  *               cookie_MaxAge：默认 12h、记住我 100d
- *               实体类型: 帖子、评论
+ *               实体类型: 帖子、评论、用户
  */
 public interface CommunityConstant {
     int ACTIVATION_SUCCESS = 0;
@@ -18,4 +18,6 @@ public interface CommunityConstant {
 
     int ENTITY_TYPE_POST = 1;
     int ENTITY_TYPE_COMMENT = 2;
+    int ENTITY_TYPE_USER = 3;
+
 }

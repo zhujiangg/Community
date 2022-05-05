@@ -2,7 +2,10 @@ package com.nowcoder.community.community.controller;
 
 import com.nowcoder.community.community.annotation.LoginRequired;
 import com.nowcoder.community.community.entity.User;
+import com.nowcoder.community.community.service.FollowService;
+import com.nowcoder.community.community.service.LikeService;
 import com.nowcoder.community.community.service.UserService;
+import com.nowcoder.community.community.util.CommunityConstant;
 import com.nowcoder.community.community.util.CommunityUtil;
 import com.nowcoder.community.community.util.HostHolder;
 import org.apache.commons.lang3.StringUtils;
@@ -31,17 +34,24 @@ import java.util.Map;
  * @Version: 1.0
  * @Description: 用户相关
  *                  1、账号设置
+ *                  2、个人主页
  */
 @Controller
 @RequestMapping("/user")
-public class UserController {
+public class UserController implements CommunityConstant {
     private static final Logger logger = LoggerFactory.getLogger(UserController.class);
 
     @Autowired
-    UserService userService;
+    private UserService userService;
 
     @Autowired
-    HostHolder hostHolder;
+    private HostHolder hostHolder;
+
+    @Autowired
+    private LikeService likeService;
+
+    @Autowired
+    private FollowService followService;
 
     @Value("${community.path.upload}")
     private String uploadPath;
@@ -146,5 +156,41 @@ public class UserController {
     @RequestMapping(value = "/forget", method = RequestMethod.GET)
     public String getforgetPage(){
         return "/site/forget";
+    }
+
+    /**
+     * 个人信息：
+     *  点赞数量
+     *  关注数量
+     *  粉丝数量
+     *  是否关注
+     * */
+    @RequestMapping(path = "/profile/{userId}", method = RequestMethod.GET)
+    public String getProfilePage(@PathVariable("userId") int userId, Model model) {
+        User user = userService.findUserById(userId);
+        if(user == null){
+            throw new RuntimeException("该用户不存在!");
+        }
+        model.addAttribute("user", user);
+
+        int likeCount = likeService.findUserLikeCount(userId);
+        model.addAttribute("likeCount", likeCount);
+
+        // 这个 user 的关注数量
+        long followeeCount = followService.findFolloweeCount(userId, ENTITY_TYPE_USER);
+        model.addAttribute("followeeCount", followeeCount);
+
+        // 这个 实体（即这个 user）的粉丝数量
+        long followerCount = followService.findFollowerCount(ENTITY_TYPE_USER, userId);
+        model.addAttribute("followerCount", followerCount);
+
+        // 这个user（我） 是否关注了 这个实体（即这个 user）
+        boolean hasFollowed = false;
+        if(hostHolder.getUser() != null){
+            hasFollowed = followService.hasFollowed(hostHolder.getUser().getId(), ENTITY_TYPE_USER, userId);
+        }
+        model.addAttribute("hasFollowed", hasFollowed);
+
+        return "/site/profile";
     }
 }
