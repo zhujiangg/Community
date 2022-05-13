@@ -37,8 +37,12 @@ public class ServiceLogAspect {
      * */
     @Before("pointcut()")
     public void before(JoinPoint joinPoint){
-        // 利用工具类获取 request
+        // 利用工具类获取 request，通过控制层访问的 service
+        // 在生产者与消费者部分，消费者直接调用 service，没有经过 controller，因此 attributes可能为空
         ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+        if(attributes == null){
+            return;
+        }
         HttpServletRequest request = attributes.getRequest();
         String ip = request.getRemoteHost();
 

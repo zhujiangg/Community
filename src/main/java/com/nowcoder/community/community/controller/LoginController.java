@@ -7,11 +7,13 @@ import com.nowcoder.community.community.entity.User;
 import com.nowcoder.community.community.service.UserService;
 import com.nowcoder.community.community.util.CommunityConstant;
 import com.nowcoder.community.community.util.CommunityUtil;
+import com.nowcoder.community.community.util.RedisKeyUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.CookieValue;
@@ -29,6 +31,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.http.HttpResponse;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @Author: ZhuJiang
@@ -45,6 +48,9 @@ public class LoginController implements CommunityConstant {
 
     @Autowired
     private Producer kaptchaProducer;
+
+    @Autowired
+    private RedisTemplate redisTemplate;
 
     @Value("${server.servlet.context-path}")
     private String contextPath;
@@ -101,13 +107,23 @@ public class LoginController implements CommunityConstant {
 
     // 生成验证码及图片并存入 session
     @RequestMapping(value = "/kaptcha", method = RequestMethod.GET)
-    public void getKaptcha(HttpServletResponse response, HttpSession session){
+    public void getKaptcha(HttpServletResponse response/*, HttpSession session*/){
         // 生成验证码及图片
         String text = kaptchaProducer.createText();
         BufferedImage image = kaptchaProducer.createImage(text);
 
         // 将验证码存入session
-        session.setAttribute("kaptcha", text);
+//        session.setAttribute("kaptcha", text);
+
+        // 将验证码存入 redis
+        String kaptchaOwner = CommunityUtil.generateUUID();
+        String kaptchaKey = RedisKeyUtil.getKaptchaKey(kaptchaOwner);
+        redisTemplate.opsForValue().set(kaptchaKey, text, 60, TimeUnit.SECONDS);
+
+        Cookie cookie = new Cookie("kaptchaOwner", kaptchaOwner);
+        cookie.setMaxAge(60);
+        cookie.setPath(contextPath);
+        response.addCookie(cookie);
 
         // 将图片输出给浏览器
         response.setContentType("image/png");
@@ -126,10 +142,18 @@ public class LoginController implements CommunityConstant {
      *      cookie 里面存的是 LoginTicket
      * */
     @RequestMapping(path = "/login", method = RequestMethod.POST)
-    public String login(String username, String password, String KaptCode, boolean rememberme,
-                        Model model, HttpSession session, HttpServletResponse response) {
+    public String login(String username, String password, String KaptCode, boolean rememberme, Model model,
+                        @CookieValue("kaptchaOwner") String kaptchaOwner/*HttpSession session*/, HttpServletResponse response) {
         // 检查验证码
-        String kaptcha = (String) session.getAttribute("kaptcha");
+//        String kaptcha = (String) session.getAttribute("kaptcha");
+
+        // 从 cookie 中获取 key，根据 key从 redis中获取验证码 kaptcha
+        String kaptcha = null;
+        if(StringUtils.isNotBlank(kaptchaOwner)){
+            String kaptchaKey = RedisKeyUtil.getKaptchaKey(kaptchaOwner);
+            kaptcha = (String)redisTemplate.opsForValue().get(kaptchaKey);
+        }
+
         if (StringUtils.isBlank(kaptcha) || StringUtils.isBlank(KaptCode) || !kaptcha.equalsIgnoreCase(KaptCode)) {
             model.addAttribute("codeMsg", "验证码不正确!");
             return "/site/login";

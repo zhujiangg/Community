@@ -19,6 +19,11 @@ import java.util.List;
  *          3、查询会话所包含的私信列表
  *          4、查询会话所包含的私信数量
  *          5、查询未读私信数量（总的、以及各会话下的）
+ *              通知相关：
+ *          1、查询某个主题下最新通知，（另外主题数量固定为 3 评论、赞、关注）
+ *          2、查询主题所包含的通知数量
+ *          3、查询未读通知数量
+ *          4、查询通知所包含的消息列表
  */
 @Service
 public class MessageService {
@@ -57,5 +62,21 @@ public class MessageService {
 
     public int readMessage(List<Integer> ids){
         return messageMapper.updateStatus(ids, 1);
+    }
+
+    public Message findLatestNotice(int userId, String topic) {
+        return messageMapper.selectLatestNotice(userId, topic);
+    }
+
+    public int findNoticeCount(int userId, String topic){
+        return messageMapper.selectNoticeCount(userId, topic);
+    }
+
+    public int findNoticeUnreadCount(int userId, String topic){
+        return messageMapper.selectNoticeUnreadCount(userId, topic);
+    }
+
+    public List<Message> findNotices(int userId, String topic, int offset, int limit){
+        return messageMapper.selectNotices(userId, topic, offset, limit);
     }
 }

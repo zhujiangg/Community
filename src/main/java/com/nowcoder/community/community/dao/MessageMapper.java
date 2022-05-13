@@ -17,6 +17,11 @@ import java.util.List;
  *          5、查询未读私信数量（总的、以及各会话下的）
  *          6、增加私信
  *          7、修改会话下所有私信状态
+ *              通知相关：
+ *          1、查询某个主题下最新通知，（这里的 user为我，另外主题数量固定为 3 评论、赞、关注）
+ *          2、查询主题所包含的通知数量
+ *          3、查询未读通知数量
+ *          4、查询通知所包含的消息列表
  */
 @Mapper
 public interface MessageMapper {
@@ -36,4 +41,15 @@ public interface MessageMapper {
     int insertMessage(Message message);
 
     int  updateStatus(List<Integer> ids, int status);
+
+    /**
+     *  通知，这里的 user为我
+     * */
+    Message selectLatestNotice(int userId, String topic);
+
+    int selectNoticeCount(int userId, String topic);
+
+    int selectNoticeUnreadCount(int userId, String topic);
+
+    List<Message> selectNotices(int userId, String topic, int offset, int limit);
 }

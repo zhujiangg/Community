@@ -13,6 +13,7 @@ import java.util.List;
  *                  1、查询每页的评论
  *                  2、查询回复的数量（评论的数量在 DiscussPost 中能取到）
  *                  3、添加评论
+ *                  4、根据 id查评论
  */
 @Mapper
 public interface CommentMapper {
@@ -22,4 +23,6 @@ public interface CommentMapper {
     int selectCountByEntity(int entityType, int entityId);
 
     int insertComment(Comment comment);
+
+    Comment selectCommentsById(int id);
 }

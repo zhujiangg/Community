@@ -12,7 +12,9 @@ import org.apache.ibatis.annotations.Mapper;
  *                  2、根据 ticket查询凭证（来自 cookie）
  *                  3、修改凭证状态
  */
+
 @Mapper
+@Deprecated // 已弃用
 public interface LoginTicketMapper {
     int insertLoginTicket(LoginTicket loginTicket);
     LoginTicket selectByTicket(String ticket);
